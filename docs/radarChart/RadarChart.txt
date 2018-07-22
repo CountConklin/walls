@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>radar chart</title>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/1.9.0/d3-legend.js" charset="utf-8"></script>
+
+	<style type="text/css">
+      .axis text{
+          font-family:sans-serif;
+          font-size:11\px;
+      }
+      .axis path,
+      .axis line{
+        fill:none;
+        stroke:gray;
+        shape-rendering: crisp-edges;
+      }
+
+      h3{
+      	font-size: 22px;
+      }
+
+</style>
+  </head>
+  <body>
+		<h3>Gymnast Scoring Radar Chart</h3>
+
+    <script>
+
+      var SLICE_IN_RADIANS = 1.25664; //the angle here is always 72 degrees, this is that in radians
+	  var slice = SLICE_IN_RADIANS; 
+	  var width = 600;
+	  var height = 600;
+	  var radius = 250; // radius of the "big circle"
+	  var margins = {top:20, bottom:60, left:45, right:120}
+	  var padding = 20;
+	  
+	  var colorPalette = ["LightCoral", "DodgerBlue", "LightGreen", "DarkMagenta", "FireBrick"];
+
+	  var chartWidth = width - margins.left - margins.right;
+	  var chartHeight = height - margins.top - margins.bottom;
+
+	  var fillOpacity = .3;
+
+		
+	  var getX = function(r, angle) {
+		/* Finds the x coordinate to place a point on the chart */
+	   	  var adj = Math.cos(angle)*r;
+		  var xCoordinate = radius - adj + margins.left;
+		  return xCoordinate;	
+	  }
+	
+	  var getY = function(r, angle) {
+	  	  /* Finds the x coordinate to place a point on the chart */
+		  var opposite = Math.sin(angle)*r;
+		  var yCoordinate = radius - opposite + margins.top;
+		  return yCoordinate;
+	  }
+
+
+	  var dataset = [ 	{axis:"Difficulty", value:8, num:1},
+						{axis:"Execution", value:3, num:1},
+						{axis:"Landing", value:4, num:1},
+						{axis:"Style", value:10, num:1}, 
+						{axis:"Creativity", value:7, num:1},
+						
+						{axis:"Difficulty", value:8, num:1}, //duplicating lets us close the shape
+						{axis:"execution", value:3, num:1},	 
+						{axis:"landing", value:4, num:1},
+						{axis:"style", value:10, num:1}, 
+						{axis:"creativity", value:7, num:1},
+						
+						{axis:"difficulty", value:1, num:2},
+						{axis:"execution", value:9, num:2},
+						{axis:"landing", value:5, num:2},
+						{axis:"style", value:8, num:2}, 
+						{axis:"creativity", value:5, num:2},
+						
+						{axis:"difficulty", value:1, num:2},
+						{axis:"execution", value:9, num:2},
+						{axis:"landing", value:5, num:2},
+						{axis:"style", value:8, num:2}, 
+						{axis:"creativity", value:5, num:2},
+						
+						{axis:"difficulty", value:9, num:3},
+						{axis:"execution", value:6, num:3},
+						{axis:"landing", value:10, num:3},
+						{axis:"style", value:7, num:3}, 
+						{axis:"creativity", value:9, num:3},
+						
+						{axis:"difficulty", value:9, num:3},
+						{axis:"execution", value:6, num:3},
+						{axis:"landing", value:10, num:3},
+						{axis:"style", value:7, num:3}, 
+						{axis:"creativity", value:9, num:3}];
+
+						
+	  var rScale = d3.scale.linear().range([radius-padding, 0]);
+	  var axisScale = d3.scale.linear().range([0, radius-padding]);	 //makes the axis go in the right direction
+	 
+	 
+		rScale.domain([d3.max(dataset, function(d, i){return +d.value;}), 0]);
+		axisScale.domain([d3.max(dataset, function(d, i){return +d.value;}), 0]);
+
+	
+		
+		var svg = d3.select('body')
+          .append('svg')
+          .attr({width:width, height:height});
+
+		var chart = svg.append("g").
+          attr("transform","translate("+margins.left + "," + margins.top + ")");
+		
+		
+		var dataNest = d3.nest()
+			.key(function(d) {return d.num;}) //nesting on athlete number, "num"
+			.entries(dataset);
+		
+		dataNest.forEach(function( d, i){
+			chart.selectAll("circle") //appending circles for each data point
+				.data(dataset)
+				.enter()
+				.append('circle')
+				.attr("fill", "black")
+				.attr({cx: function(d, i){ return getX(rScale(+d.value), i*slice);},
+						cy: function(d, i){ return getY(rScale(+d.value), i*slice);}, 
+						r: 3});
+			});
+		
+		var line = d3.svg.line()
+			.x(function(d, i){ return getX(rScale(+d.value), i*slice);})
+			.y(function(d, i){ return getY(rScale(+d.value), i*slice);});
+		
+		dataNest.forEach(function(d, i) {
+			chart.append("path")
+				.datum(dataset)
+				.attr("class", "line")
+				.attr("d", line(d.values))
+				.attr('stroke-width', 2)
+				.attr("stroke", colorPalette[i])
+				.attr("fill", colorPalette[i])
+				.attr("fill-opacity", fillOpacity);
+		});	
+				
+		for (var i = 1; i <= 5; i++) {  			//remember, the number is hardcoded
+			chart.append("svg:line")
+				//appending lines for the axes
+				.attr("x1", radius+margins.left)
+				.attr("y1", radius+margins.top)
+				.attr("x2", getX(rScale(11), i*slice))
+				.attr("y2", getY(rScale(11), i*slice))
+				.attr("class", "line")
+				.style("stroke", "grey");
+				
+			chart.append("text") //labelling the axes
+				.attr({x: getX(rScale(11), i*slice),
+					   y: getY(rScale(11), i*slice)})
+				.text(dataset[i].axis);
+		};
+		
+		
+				
+		for (i = 1; i <= 10; i++) {   			//this makes the guide circles
+			chart.append("circle")
+				.attr({	cx: radius+margins.left,
+						cy: radius+margins.top,
+						r:rScale(i)})
+				.attr("fill", "none")
+				.attr("stroke", "Grey")
+				.attr("stroke-width", "0.3px");
+		};
+
+		chart.append("circle")					//darker circle for the outside
+			.attr({	cx: radius+margins.left,
+					cy: radius+margins.top,
+					r: rScale(10)})
+			.attr("fill", "none")
+			.attr("stroke", "grey");
+			
+		chart.append("circle")
+			.attr({	cx: radius+margins.left,
+					cy: radius+margins.top,
+					r:1})
+			.attr("fill", "black");	
+
+
+
+	    //making a legend using d3.legend
+	    var ordinal = d3.scale.ordinal()
+	      .domain(["Gymnast 1", "Gymnast 2", "Gymnast 3"])
+	      .range(["LightCoral", "DodgerBlue", "LightGreen"]);
+
+	    var svg = d3.select("svg");
+
+	    svg.append("g")
+	      .attr("class", "legendOrdinal")
+	      .attr("transform", "translate(60,20)");
+
+	    var legendOrdinal = d3.legend.color()
+	      .shape("path", d3.svg.symbol().type("square").size(150)())
+	      .shapePadding(10)
+	      .scale(ordinal);
+
+	    svg.select(".legendOrdinal")
+	      .call(legendOrdinal);
+
+
+
+		var rAxis = d3.svg.axis()
+			.scale(axisScale)
+			.orient("bottom");
+			
+		chart.append("g")
+			.attr("class", "axis")
+			.attr("transform", "translate(" + (margins.left + padding) + ", " + (radius + margins.top) + ")")
+			.call(rAxis);			
+
+	
+    </script>
+  </body>
+</html>
+
