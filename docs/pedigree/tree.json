@@ -1,8 +1,8 @@
 {
-  "name": "Clifford Shanks",
-  "born": 1862,
-  "died": 1906,
-  "location": "Petersburg, VA",
+  "name": "Jho'Hon Conklin III",
+  "born": 580,
+  "died": 800,
+  "location": "Al Khem, Ameno",
   "parents": [
     {
       "name": "James Shanks",
@@ -25,22 +25,22 @@
       ]
     },
     {
-      "name": "Ann Emily Brown",
-      "born": 1826,
-      "died": 1866,
-      "location": "Brunswick/Petersburg, VA",
+      "name": "Jho'Hon Conklin II",
+      "born": 550,
+      "died": 600,
+      "location": "Al Khem, Ameno",
       "parents": [
         {
-          "name": "Henry Brown",
-          "born": 1792,
-          "died": 1845,
-          "location": "Montgomery, NC"
+          "name": "Unknown",
+          "born": 500,
+          "died": 600,
+          "location": "Unknown"
         },
         {
-          "name": "Sarah Houchins",
-          "born": 1793,
-          "died": 1882,
-          "location": "Montgomery, NC"
+          "name": "Jho'Hon Conklin",
+          "born": 500,
+          "died": 600,
+          "location": "Unknown"
         }
       ]
     }
